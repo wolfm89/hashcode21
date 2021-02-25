@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import numpy as np
-from sklearn import preprocessing
-import matplotlib.pyplot as plt
 
 
 def score(sim_duration, car_score, cars, isec_schedules):
@@ -38,7 +35,7 @@ def is_green(isec_schedule, street_name, T):
                 t += green_duration
 
 
-def algorithm(streets):
+def algorithm(streets, c):
     intersections = dict()
     for street in streets:
         if street.end_isec not in intersections:
@@ -52,7 +49,7 @@ def algorithm(streets):
     for isec_ix, streets in intersections.items():
         isec_schedule = IntersectionSchedule(isec_ix)
         for street in streets:
-            isec_schedule.add_street_schedule(street, 1)
+            isec_schedule.add_street_schedule(street, c)
         isec_schedules.append(isec_schedule)
 
     return isec_schedules
@@ -128,30 +125,9 @@ if __name__ == "__main__":
         print("n_streets: {}".format(len(streets)))
         print("n_cars: {}".format(len(cars)))
 
-        #for car in cars:
-        #    print(car)
-
-        #for street in streets:
-        #    print(street)
-
-        isec_schedules = algorithm(streets)
-
-        # isec_schedules = []
-        #
-        # isec_schedule = IntersectionSchedule(1)
-        # isec_schedule.add_street_schedule([street for street in streets if street.name == "rue-d-athenes"][0], 2)
-        # isec_schedule.add_street_schedule([street for street in streets if street.name == "rue-d-amsterdam"][0], 1)
-        # isec_schedules.append(isec_schedule)
-        #
-        # isec_schedule = IntersectionSchedule(0)
-        # isec_schedule.add_street_schedule([street for street in streets if street.name == "rue-de-londres"][0], 2)
-        # isec_schedules.append(isec_schedule)
-        #
-        # isec_schedule = IntersectionSchedule(2)
-        # isec_schedule.add_street_schedule([street for street in streets if street.name == "rue-de-moscou"][0], 1)
-        # isec_schedules.append(isec_schedule)
+        isec_schedules = algorithm(streets, 2)
 
         write("output/" + filename + ".out", isec_schedules)
 
-        print("Score: {}".format(score(sim_duration, car_score, cars, isec_schedules)))
+        # print("Score: {}".format(score(sim_duration, car_score, cars, isec_schedules)))
 
