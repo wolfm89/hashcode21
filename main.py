@@ -5,20 +5,12 @@ from sklearn import preprocessing
 import matplotlib.pyplot as plt
 
 
-def score(library_list, days):
+def score(sim_duration, car_score, streets, cars, isec_schedules):
     score = 0
-    list_scanned_books = []
-    days_remaining = days
 
-    for library in library_list:
-        if days_remaining >= library.signup_days:
-            days_remaining = days_remaining - library.signup_days
-            books_scanning_limit = days_remaining * library.books_per_day
-            books_possible_to_scan = library.books[0:books_scanning_limit-1]
-            for book in books_possible_to_scan:
-                if list_scanned_books.count(book.id) == 0:
-                    score = score + book.score
-                    list_scanned_books.append(book.id)
+    for t in range(sim_duration):
+        break
+
     return score
 
 def algorithm1(libraries, scanning_days):
@@ -124,7 +116,16 @@ class Car(object):
         self.streets = streets
 
     def __str__(self):
-        return "Car {}: {}".format(self.ix, self.streets)
+        return "Car {}: {}".format(self.ix, [street.name for street in self.streets])
+
+
+class IntersectionSchedule(object):
+    def __init__(self, isec_ix):
+        self.isec_ix = isec_ix
+        self.street_schedules = []
+
+    def add_street_schedule(self, name, duration):
+        self.street_schedules.append((name, duration))
 
 
 def read(filename):
@@ -138,15 +139,24 @@ def read(filename):
         cars = []
         for i_car in range(0, n_cars):
             n_car_streets, car_street_names = infile.readline().strip().split(maxsplit=1)
-            cars.append(Car(i_car, car_street_names.split()))
-    return sim_duration, n_isec, streets, cars
+            car_street_names = car_street_names.split()
+            car_streets = []
+            for car_street_name in car_street_names:
+                for street in streets:
+                    if street.name == car_street_name:
+                        car_streets.append(street)
+                        break
+            cars.append(Car(i_car, car_streets))
+    return sim_duration, car_score, n_isec, streets, cars
 
-def write(filename, libraries):
+def write(filename, isec_schedules):
     with open(filename, 'w') as outfile:
-        outfile.write(str(len(libraries)) + "\n")
-        for library in libraries:
-            outfile.write("{} {}".format(library.id, len(library.books)) + "\n")
-            outfile.write(" ".join([str(book.id) for book in library.books]) + "\n")
+        outfile.write(str(len(isec_schedules)) + "\n")
+        for isec_schedule in isec_schedules:
+            outfile.write("{}".format(isec_schedule.isec_ix) + "\n")
+            outfile.write("{}".format(len(isec_schedule.street_schedules)) + "\n")
+            for street_schedule in isec_schedule.street_schedules:
+                outfile.write("{} {}".format(street_schedule[0], street_schedule[1]) + "\n")
 
 if __name__ == "__main__":
     filenames = ["a", "b", "c", "d", "e", "f"]
@@ -154,7 +164,7 @@ if __name__ == "__main__":
 
     for filename in filenames:
         print(filename)
-        sim_duration, n_isec, streets, cars = read("data/" + filename + ".txt")
+        sim_duration, car_score, n_isec, streets, cars = read("data/" + filename + ".txt")
         print("n_streets: {}".format(len(streets)))
         print("n_cars: {}".format(len(cars)))
 
@@ -168,5 +178,22 @@ if __name__ == "__main__":
 
         # print(score(result_libraries, scanning_time))
 
-        # write("output/" + filename + ".out", result_libraries)
+    isec_schedules = []
+
+    isec_schedule = IntersectionSchedule(1)
+    isec_schedule.add_street_schedule("rue-d-athenes", 2)
+    isec_schedule.add_street_schedule("rue-d-amsterdam", 1)
+    isec_schedules.append(isec_schedule)
+
+    isec_schedule = IntersectionSchedule(0)
+    isec_schedule.add_street_schedule("rue-d-londres", 2)
+    isec_schedules.append(isec_schedule)
+
+    isec_schedule = IntersectionSchedule(2)
+    isec_schedule.add_street_schedule("rue-d-moscou", 1)
+    isec_schedules.append(isec_schedule)
+
+    write("output/" + filename + ".out", isec_schedules)
+
+    print("Score: {}".format(score(sim_duration, car_score, streets, cars, isec_schedules)))
 
