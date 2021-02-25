@@ -65,21 +65,30 @@ def algo1(street_frequency_dict, end_intersection_dict):
 def write(file_name, street_frequency_dict, end_intersection_dict):
     duration_dict = algo1(street_frequency_dict, end_intersection_dict)
     with open(file_name, 'w') as outfile:
-        outfile.write(str(len(end_intersection_dict)) + "\n")
+        # outfile.write(str(len(end_intersection_dict)) + "\n")
+        intersection_counter = 0
         for intersection, street_name_list in end_intersection_dict.items():
-            outfile.write(str(intersection) + "\n")
-            outfile.write(str(len(street_name_list)) + "\n")
-
+            street_name_list_filtered = []
             for i in street_name_list:
                 if i in duration_dict.keys():
-                    outfile.write(str(i) + " " + str(duration_dict[i]) + "\n")
-                else:
-                    outfile.write(str(i) + " " + "0" + "\n")
-                    
+                    street_name_list_filtered.append(i)
+
+            if len(street_name_list_filtered) == 0:
+                continue
+            intersection_counter += 1
+            outfile.write(str(intersection) + "\n")
+            outfile.write(str(len(street_name_list_filtered)) + "\n")
+
+            for i in street_name_list_filtered:
+                outfile.write(str(i) + " " + str(duration_dict[i]) + "\n")
+    with open(file_name, 'r+') as outfile:
+        content = outfile.read()
+        outfile.seek(0,0)
+        outfile.write(str(intersection_counter) + "\n" + content)
 
 if __name__ == "__main__":
     filenames = ["a", "b", "c", "d", "e", "f"]
-    # filenames = [filenames[0]]
+    filenames = [filenames[3]]
 
     for filename in filenames:
         print(filename)
