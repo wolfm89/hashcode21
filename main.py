@@ -37,90 +37,25 @@ def is_green(isec_schedule, street_name, T):
             else:
                 t += green_duration
 
-def algorithm1(libraries, scanning_days):
-    def algo(timer, lib):
-        lib.books.sort(key=lambda book: book.score, reverse=True)
-        lib.books = lib.books[:(timer * lib.books_per_day)]
 
-    timer = scanning_days
-    libraries.sort(key=lambda library: library.signup_days)
-    books_total = set()
-    i_break = -1
-    for i, library in enumerate(libraries):
-        #if (library.id == 163):
-            #print(timer, library.id, len(library.books), library.signup_days, library.books_per_day)
-        timer = timer - library.signup_days
-        if timer <= 0:
-            i_break = i
-            break
-        library.books = [book for book in library.books if book not in books_total]
-        if len(library.books) == 0:
-            continue
-        # create set form books list and disjunct irgendwas
-        algo(timer, library)
-        books_total = books_total.union(library.books)
-    return [library for library[:i_break] in libraries if len(library.books) != 0]
+def algorithm(streets):
+    intersections = dict()
+    for street in streets:
+        if street.end_isec not in intersections:
+            intersections[street.end_isec] = set()
+            intersections[street.end_isec].add(street)
+        else:
+            intersections[street.end_isec].add(street)
 
-def algorithm2(libraries, scanning_days):
-    def calc_scores(libraries, scanning_days):
+    isec_schedules = []
 
-        select_books = lambda library: sorted(library.books, key=lambda book: book.score, reverse=True)[:scanning_days*library.books_per_day]
-        scores = np.array([sum([b.score for b in select_books(library)]) for library in libraries])
-        norm_scores = preprocessing.scale(scores)
+    for isec_ix, streets in intersections.items():
+        isec_schedule = IntersectionSchedule(isec_ix)
+        for street in streets:
+            isec_schedule.add_street_schedule(street, 1)
+        isec_schedules.append(isec_schedule)
 
-        n_books = np.array([len(library.books) for library in libraries])
-        norm_n_books = - preprocessing.scale(n_books)
-
-        sign_up = np.array([library.signup_days for library in libraries])
-        #print(sign_up.min(), sign_up.max())
-        norm_sign_up = - preprocessing.scale(sign_up)
-
-        books_per_day = np.array([library.books_per_day for library in libraries])
-        norm_books_per_day = preprocessing.scale(books_per_day)
-
-        if False:
-            datas = [scores, n_books, sign_up, books_per_day]
-            for data in datas:
-                plt.hist(data, bins=100)
-                plt.show()
-                plt.gca().set(title='Frequency Histogram', ylabel='Frequency')
-
-        #library_scores = norm_scores + norm_n_books + norm_sign_up + norm_books_per_day # a, b
-        #library_scores = norm_sign_up # c
-        #library_scores = norm_scores + norm_n_books # d
-        #library_scores = 1.4*norm_scores + norm_n_books + 2*norm_sign_up + norm_books_per_day # e
-        library_scores = 6*norm_scores + norm_n_books + 20*norm_sign_up + norm_books_per_day # f
-
-        for library, score in zip(libraries, library_scores.tolist()):
-            library.score = score
-
-    def algo(timer, lib):
-        lib.books.sort(key=lambda book: book.score, reverse=True)
-        lib.books = lib.books[:(timer * lib.books_per_day)]
-
-    print("scanning days: {}".format(scanning_days))
-    timer = scanning_days
-
-    calc_scores(libraries, scanning_days)
-    libraries.sort(key=lambda library: library.score, reverse=True)
-
-    for lib in libraries[:5]:
-        print(lib)
-
-    books_total = set()
-    for library in libraries:
-        timer = timer - library.signup_days
-        if timer <= 0:
-            break
-        library.books = [book for book in library.books if book not in books_total]
-        if len(library.books) == 0:
-            continue
-        # create set form books list and disjunct irgendwas
-        algo(timer, library)
-        books_total = books_total.union(library.books)
-    print("n_books_total in result: {}".format(len(books_total)))
-    print("Total book score: {}".format(sum([b.score for b in books_total])))
-    return [library for library in libraries if len(library.books) != 0]
+    return isec_schedules
 
 
 class Street(object):
@@ -185,7 +120,7 @@ def write(filename, isec_schedules):
 
 if __name__ == "__main__":
     filenames = ["a", "b", "c", "d", "e", "f"]
-    filenames = [filenames[0]]
+    # filenames = [filenames[0]]
 
     for filename in filenames:
         print(filename)
@@ -193,32 +128,30 @@ if __name__ == "__main__":
         print("n_streets: {}".format(len(streets)))
         print("n_cars: {}".format(len(cars)))
 
-        for car in cars:
-            print(car)
+        #for car in cars:
+        #    print(car)
 
-        for street in streets:
-            print(street)
+        #for street in streets:
+        #    print(street)
 
-        # result_libraries = algorithm2(libraries, scanning_time)
+        isec_schedules = algorithm(streets)
 
-        # print(score(result_libraries, scanning_time))
+        # isec_schedules = []
+        #
+        # isec_schedule = IntersectionSchedule(1)
+        # isec_schedule.add_street_schedule([street for street in streets if street.name == "rue-d-athenes"][0], 2)
+        # isec_schedule.add_street_schedule([street for street in streets if street.name == "rue-d-amsterdam"][0], 1)
+        # isec_schedules.append(isec_schedule)
+        #
+        # isec_schedule = IntersectionSchedule(0)
+        # isec_schedule.add_street_schedule([street for street in streets if street.name == "rue-de-londres"][0], 2)
+        # isec_schedules.append(isec_schedule)
+        #
+        # isec_schedule = IntersectionSchedule(2)
+        # isec_schedule.add_street_schedule([street for street in streets if street.name == "rue-de-moscou"][0], 1)
+        # isec_schedules.append(isec_schedule)
 
-    isec_schedules = []
+        write("output/" + filename + ".out", isec_schedules)
 
-    isec_schedule = IntersectionSchedule(1)
-    isec_schedule.add_street_schedule([street for street in streets if street.name == "rue-d-athenes"][0], 2)
-    isec_schedule.add_street_schedule([street for street in streets if street.name == "rue-d-amsterdam"][0], 1)
-    isec_schedules.append(isec_schedule)
-
-    isec_schedule = IntersectionSchedule(0)
-    isec_schedule.add_street_schedule([street for street in streets if street.name == "rue-de-londres"][0], 2)
-    isec_schedules.append(isec_schedule)
-
-    isec_schedule = IntersectionSchedule(2)
-    isec_schedule.add_street_schedule([street for street in streets if street.name == "rue-de-moscou"][0], 1)
-    isec_schedules.append(isec_schedule)
-
-    write("output/" + filename + ".out", isec_schedules)
-
-    print("Score: {}".format(score(sim_duration, car_score, cars, isec_schedules)))
+        print("Score: {}".format(score(sim_duration, car_score, cars, isec_schedules)))
 
