@@ -5,25 +5,6 @@ from sklearn import preprocessing
 import matplotlib.pyplot as plt
 
 
-class Library(object):
-    def __init__(self, id, signup_days, books_per_day, books):
-        self.id = id
-        self.signup_days = signup_days
-        self.books_per_day = books_per_day
-        self.books = books
-        self.score = 0
-
-    def __str__(self):
-        return "{} {} {} {} {}".format(self.id, self.signup_days, self.books_per_day, sum([b.score for b in self.books]), self.score) # + "\n".join([str(b) for b in books])
-
-class Book(object):
-    def __init__(self, id, score):
-        self.id = id
-        self.score = score
-
-    def __str__(self):
-        return "Book {}: {}".format(self.id, self.score)
-
 def score(library_list, days):
     score = 0
     list_scanned_books = []
@@ -125,17 +106,40 @@ def algorithm2(libraries, scanning_days):
     print("Total book score: {}".format(sum([b.score for b in books_total])))
     return [library for library in libraries if len(library.books) != 0]
 
+
+class Street(object):
+    def __init__(self, start_isec, end_isec, name, length):
+        self.start_isec = start_isec
+        self.end_isec = end_isec
+        self.name = name
+        self.length = length
+
+    def __str__(self):
+        return "Street {}: start={} end={} length={}".format(self.name, self.start_isec, self.end_isec, self.length)
+
+
+class Car(object):
+    def __init__(self, ix, streets):
+        self.ix = ix
+        self.streets = streets
+
+    def __str__(self):
+        return "Car {}: {}".format(self.ix, self.streets)
+
+
 def read(filename):
     with open(filename, 'r') as infile:
-        libraries = []
-        n_books_total, n_libraries, scanning_time = [int(s) for s in infile.readline().strip().split()]
-        books = [Book(i, int(s)) for i, s in enumerate(infile.readline().strip().split())]
+        sim_duration, n_isec, n_streets, n_cars, car_score = [int(s) for s in infile.readline().strip().split()]
+        streets = []
+        for i_street in range(0, n_streets):
+            start_isec, end_isec, name, length = infile.readline().strip().split()
+            streets.append(Street(int(start_isec), int(end_isec), name, int(length)))
 
-        for i_lib in range(0, n_libraries):
-            n_books, signup_days, books_per_day = [int(s) for s in infile.readline().strip().split()]
-            books_in_lib = [int(s) for s in infile.readline().strip().split()]
-            libraries.append(Library(i_lib, signup_days, books_per_day, [books[i] for i in books_in_lib]))
-    return n_books_total, scanning_time, books, libraries
+        cars = []
+        for i_car in range(0, n_cars):
+            n_car_streets, car_street_names = infile.readline().strip().split(maxsplit=1)
+            cars.append(Car(i_car, car_street_names.split()))
+    return sim_duration, n_isec, streets, cars
 
 def write(filename, libraries):
     with open(filename, 'w') as outfile:
@@ -145,17 +149,24 @@ def write(filename, libraries):
             outfile.write(" ".join([str(book.id) for book in library.books]) + "\n")
 
 if __name__ == "__main__":
-    filenames = ["a_example", "b_read_on", "c_incunabula", "d_tough_choices", "e_so_many_books", "f_libraries_of_the_world"]
-    filenames = [filenames[5]]
+    filenames = ["a", "b", "c", "d", "e", "f"]
+    filenames = [filenames[0]]
 
     for filename in filenames:
         print(filename)
-        n_books_total, scanning_time, books, libraries = read("data/" + filename + ".txt")
-        print("n_books_total: {}".format(n_books_total))
+        sim_duration, n_isec, streets, cars = read("data/" + filename + ".txt")
+        print("n_streets: {}".format(len(streets)))
+        print("n_cars: {}".format(len(cars)))
 
-        result_libraries = algorithm2(libraries, scanning_time)
+        for car in cars:
+            print(car)
+
+        for street in streets:
+            print(street)
+
+        # result_libraries = algorithm2(libraries, scanning_time)
 
         # print(score(result_libraries, scanning_time))
 
-        write("output/" + filename + ".out", result_libraries)
+        # write("output/" + filename + ".out", result_libraries)
 
