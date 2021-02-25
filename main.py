@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import numpy as np
-from sklearn import preprocessing
-import matplotlib.pyplot as plt
+# import numpy as np
+# from sklearn import preprocessing
+# import matplotlib.pyplot as plt
 
 
 class Library(object):
@@ -16,13 +16,23 @@ class Library(object):
     def __str__(self):
         return "{} {} {} {} {}".format(self.id, self.signup_days, self.books_per_day, sum([b.score for b in self.books]), self.score) # + "\n".join([str(b) for b in books])
 
-class Book(object):
-    def __init__(self, id, score):
-        self.id = id
-        self.score = score
+class Car(object):
+    def __init__(self, n_streets, streets_name):
+        self.n_streets = n_streets
+        self.streets_name = streets_name
 
     def __str__(self):
-        return "Book {}: {}".format(self.id, self.score)
+        return f"Car: {self.n_streets} streets: {self.streets_name}"
+
+class Street(object):
+    def __init__(self, start_intersection, end_intersection, street_name, travel_time):
+        self.start_intersection = start_intersection
+        self.end_intersection = end_intersection
+        self.street_name = street_name
+        self.travel_time = travel_time
+
+    def __str__(self):
+        return f"street {self.street_name}, intersection {self.start_intersection} to {self.end_intersection}, takes time: {self.travel_time}"
 
 def score(library_list, days):
     score = 0
@@ -127,15 +137,19 @@ def algorithm2(libraries, scanning_days):
 
 def read(filename):
     with open(filename, 'r') as infile:
-        libraries = []
-        n_books_total, n_libraries, scanning_time = [int(s) for s in infile.readline().strip().split()]
-        books = [Book(i, int(s)) for i, s in enumerate(infile.readline().strip().split())]
+        durationD, n_intersections, n_streets, n_cars, bonusF = [int(s) for s in infile.readline().strip().split()]
+        streets = []
+        cars = []
 
-        for i_lib in range(0, n_libraries):
-            n_books, signup_days, books_per_day = [int(s) for s in infile.readline().strip().split()]
-            books_in_lib = [int(s) for s in infile.readline().strip().split()]
-            libraries.append(Library(i_lib, signup_days, books_per_day, [books[i] for i in books_in_lib]))
-    return n_books_total, scanning_time, books, libraries
+        for i_street in range(0, n_streets):
+            b ,e, street_name, l = infile.readline().strip().split()
+            streets.append(Street(b,e,street_name, l))
+        
+        for i_car in range(0, n_cars):
+            readline_list = infile.readline().strip().split()
+            cars.append(Car(readline_list[0], readline_list[1:]))
+
+    return durationD, n_intersections, n_streets, n_cars, bonusF, streets, cars
 
 def write(filename, libraries):
     with open(filename, 'w') as outfile:
@@ -145,17 +159,21 @@ def write(filename, libraries):
             outfile.write(" ".join([str(book.id) for book in library.books]) + "\n")
 
 if __name__ == "__main__":
-    filenames = ["a_example", "b_read_on", "c_incunabula", "d_tough_choices", "e_so_many_books", "f_libraries_of_the_world"]
-    filenames = [filenames[5]]
+    filenames = ["a", "b", "c", "d", "e", "f"]
+    filenames = [filenames[0]]
 
     for filename in filenames:
         print(filename)
-        n_books_total, scanning_time, books, libraries = read("data/" + filename + ".txt")
-        print("n_books_total: {}".format(n_books_total))
+        # n_books_total, scanning_time, books, libraries = read("data/" + filename + ".txt")
+        durationD, n_intersections, n_streets, n_cars, bonusF, streets, cars = read("data/" + filename + ".txt")
+        # for s in streets:
+        #     print(s)
 
-        result_libraries = algorithm2(libraries, scanning_time)
+        # for c in cars:
+        #     print(c)
+        # result_libraries = algorithm2(libraries, scanning_time)
 
         # print(score(result_libraries, scanning_time))
 
-        write("output/" + filename + ".out", result_libraries)
+        # write("output/" + filename + ".out", result_libraries)
 
