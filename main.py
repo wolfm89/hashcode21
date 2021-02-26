@@ -75,12 +75,12 @@ def filter_not_used_streets_neg(street_frequency_dict, end_intersection_dict):
 def filter_not_used_streets_pos(street_frequency_dict, end_intersection_dict):
     filtered_end_intersection_dict = {}
     for intersection, street_name_list in end_intersection_dict.items():
+        c = 0
         for street in street_name_list:
-            c = 0
             if street in street_frequency_dict.keys():
                 if c == 0:
                     filtered_end_intersection_dict[intersection] = []
-                    c += 1
+                    c = 1
                 filtered_end_intersection_dict[intersection].append(street)
 
     return filtered_end_intersection_dict
@@ -177,5 +177,5 @@ if __name__ == "__main__":
 
         #write("output/" + filename + ".out", street_frequency_dict, end_intersection_dict)
         nb_algo = 0
-        write_filtered("output/" + filename + "_f_%i.out" %nb_algo, street_frequency_dict, filtered_end_intersection_dict,nb_algo)
+        write_filtered("output/" + filename + "_fs_%i.out" %nb_algo, street_frequency_dict, filtered_end_intersection_dict,nb_algo)
 
