@@ -4,6 +4,7 @@
 # from sklearn import preprocessing
 # import matplotlib.pyplot as plt
 import collections
+import copy
 
 
 class Car(object):
@@ -56,11 +57,52 @@ def read(filename):
 
     return durationD, n_intersections, n_streets, n_cars, bonusF, streets, cars
 
+#slower
+def filter_not_used_streets_neg(street_frequency_dict, end_intersection_dict):
+    filtered_end_intersection_dict = copy.deepcopy(end_intersection_dict)
+    for intersection, street_name_list in end_intersection_dict.items():
+        for street in street_name_list:
+            if street not in street_frequency_dict.keys():
+                #print("Before: %s"%filtered_end_intersection_dict[intersection])
+                filtered_end_intersection_dict[intersection].remove(street)
+                #print("After: %s"%filtered_end_intersection_dict[intersection])
+        if len(filtered_end_intersection_dict[intersection]) == 0:
+            del filtered_end_intersection_dict[intersection]
+
+    return filtered_end_intersection_dict
+
+#faster
+def filter_not_used_streets_pos(street_frequency_dict, end_intersection_dict):
+    filtered_end_intersection_dict = {}
+    for intersection, street_name_list in end_intersection_dict.items():
+        for street in street_name_list:
+            c = 0
+            if street in street_frequency_dict.keys():
+                if c == 0:
+                    filtered_end_intersection_dict[intersection] = []
+                    c += 1
+                filtered_end_intersection_dict[intersection].append(street)
+
+    return filtered_end_intersection_dict
+
 def algo1(street_frequency_dict, end_intersection_dict):
     result_dict = {}
     for street in street_frequency_dict.keys():
         result_dict[street] = 1
     return result_dict
+
+#def algo2(street_frequency_dict, end_intersection):
+
+def write_filtered(file_name,street_frequency_dict,end_intersection_dict):
+    duration_dict = algo1(street_frequency_dict, end_intersection_dict)
+    with open(file_name, 'w') as outfile:
+        outfile.write(str(len(end_intersection_dict)) + "\n")
+        for intersection, street_name_list in end_intersection_dict.items():
+            outfile.write("%s\n" %intersection)
+            outfile.write("%i\n" %len(street_name_list))
+            for street in street_name_list:
+                outfile.write("%s %i\n" %(street,duration_dict[street]))
+
 
 def write(file_name, street_frequency_dict, end_intersection_dict):
     duration_dict = algo1(street_frequency_dict, end_intersection_dict)
@@ -88,7 +130,7 @@ def write(file_name, street_frequency_dict, end_intersection_dict):
 
 if __name__ == "__main__":
     filenames = ["a", "b", "c", "d", "e", "f"]
-    filenames = [filenames[3]]
+    filenames = [filenames[1]]
 
     for filename in filenames:
         print(filename)
@@ -101,11 +143,14 @@ if __name__ == "__main__":
         #     print(c)
         street_frequency_dict = create_street_frequency(cars)
         end_intersection_dict = create_end_intersection_dict(streets)
-        print(street_frequency_dict)
-        print(end_intersection_dict)
+
+        filtered_end_intersection_dict = filter_not_used_streets_pos(street_frequency_dict, end_intersection_dict)
+        #print(street_frequency_dict)
+        #print(end_intersection_dict)
         # result_libraries = algorithm2(libraries, scanning_time)
 
         # print(score(result_libraries, scanning_time))
 
-        write("output/" + filename + ".out", street_frequency_dict, end_intersection_dict)
+        #write("output/" + filename + ".out", street_frequency_dict, end_intersection_dict)
+        write_filtered("output/" + filename + "_f.out", street_frequency_dict, filtered_end_intersection_dict)
 
