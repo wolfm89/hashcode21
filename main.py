@@ -176,6 +176,6 @@ if __name__ == "__main__":
         # print(score(result_libraries, scanning_time))
 
         #write("output/" + filename + ".out", street_frequency_dict, end_intersection_dict)
-        nb_algo = 0
-        write_filtered("output/" + filename + "_fs_%i.out" %nb_algo, street_frequency_dict, filtered_end_intersection_dict,nb_algo)
+        nb_algo = 1
+        write_filtered("output/" + filename + "_f_%i.out" %nb_algo, street_frequency_dict, filtered_end_intersection_dict,nb_algo)
 
