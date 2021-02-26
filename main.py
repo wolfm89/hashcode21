@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# import numpy as np
+import numpy as np
 # from sklearn import preprocessing
 # import matplotlib.pyplot as plt
 import collections
@@ -91,7 +91,19 @@ def algo1(street_frequency_dict, end_intersection_dict):
         result_dict[street] = 1
     return result_dict
 
-#def algo2(street_frequency_dict, end_intersection):
+def algo2_filtered(street_frequency_dict, end_intersection_dict):
+    result_dict = {}
+    for intersection in end_intersection_dict:
+        nb_streets = len(end_intersection_dict[intersection])
+        if len > 1:
+            numbers = np.zeros(nb_streets)
+            for i,street in enumerate(end_intersection_dict[intersection]):
+                numbers[i]=street_frequency_dict[street]
+            #eigentliche algo
+            avg = numbers.mean()
+        else:
+            result_dict[intersection]=1
+
 
 def write_filtered(file_name,street_frequency_dict,end_intersection_dict):
     duration_dict = algo1(street_frequency_dict, end_intersection_dict)
