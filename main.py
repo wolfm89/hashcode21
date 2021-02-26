@@ -91,22 +91,34 @@ def algo1(street_frequency_dict, end_intersection_dict):
         result_dict[street] = 1
     return result_dict
 
-def algo2_filtered(street_frequency_dict, end_intersection_dict):
+def algo2_filtered(street_frequency_dict, end_intersection_dict,algo_nb):
     result_dict = {}
     for intersection in end_intersection_dict:
         nb_streets = len(end_intersection_dict[intersection])
-        if len > 1:
+        if nb_streets > 1:
             numbers = np.zeros(nb_streets)
             for i,street in enumerate(end_intersection_dict[intersection]):
                 numbers[i]=street_frequency_dict[street]
-            #eigentliche algo
-            avg = numbers.mean()
+
+            #here comes the algo, result equals end freq for cycling
+            #0: easy alg, with lowest number equals 1
+            if algo_nb == 0:
+                result = np.rint(numbers / numbers.min()) #rounds to nearest integer
+            #1: easy alg, with division by mean value
+            elif algo_nb == 1:
+                result = np.rint(numbers / numbers.mean())
+
+            for i,street in enumerate(end_intersection_dict[intersection]): 
+                result_dict[street] = result[i]
+
+        #default if only one street in intersection
         else:
-            result_dict[intersection]=1
+            result_dict[end_intersection_dict[intersection][0]] = 1
+    return result_dict
 
 
-def write_filtered(file_name,street_frequency_dict,end_intersection_dict):
-    duration_dict = algo1(street_frequency_dict, end_intersection_dict)
+def write_filtered(file_name,street_frequency_dict,end_intersection_dict,algo_nb):
+    duration_dict = algo2_filtered(street_frequency_dict, end_intersection_dict,algo_nb)
     with open(file_name, 'w') as outfile:
         outfile.write(str(len(end_intersection_dict)) + "\n")
         for intersection, street_name_list in end_intersection_dict.items():
@@ -164,5 +176,6 @@ if __name__ == "__main__":
         # print(score(result_libraries, scanning_time))
 
         #write("output/" + filename + ".out", street_frequency_dict, end_intersection_dict)
-        write_filtered("output/" + filename + "_f.out", street_frequency_dict, filtered_end_intersection_dict)
+        nb_algo = 0
+        write_filtered("output/" + filename + "_f_%i.out" %nb_algo, street_frequency_dict, filtered_end_intersection_dict,nb_algo)
 
